@@ -1,9 +1,10 @@
 // Upload constructor
 function Upload(file, o, key) {
   function Upload() {
-    var upload, id, parts, part, segs, chunk_segs, chunk_lens, pipes, blob;
+    var upload, id, parts, part, segs, chunk_segs, chunk_lens, pipes, blob, chunkSize;
 
     upload = this;
+    chunkSize = 5242880;
 
     this.key = key;
     this.file = file;
@@ -17,23 +18,23 @@ function Upload(file, o, key) {
 
     // Break the file into an appropriate amount of chunks
     // This needs to be optimized for various browsers types/versions
-    if (this.size > 1000000000) { // size greater than 1gb
+    if (this.size > 100 * chunkSize) { // size greater than 1gb
       num_segs = 100;
       pipes = 10;
-    } else if (this.size > 500000000) { // greater than 500mb
+    } else if (this.size > 50 * chunkSize) { // greater than 500mb
       num_segs = 50;
       pipes = 5;
     // S3 requires minimum size to be 5242880 bytes, if the part
     // is anything other than the last part.
-    } else if (this.size > 104857600) { // greater than 100 mb
+    } else if (this.size > 20 * chunkSize) { // greater than 100 mb
       num_segs = 20;
       pipes = 5;
-    } else if (this.size > 50000000) { // greater than 50 mb
+    } else if (this.size > 5 * chunkSize) { // greater than 50 mb
       num_segs = 5;
       pipes = 2;
     // S3 requires minimum size to be 5242880 bytes, if the part
     // is anything other than the last part.
-    } else if (this.size > 10485760) { // greater than 10 mb
+    } else if (this.size > 2 * chunkSize) { // greater than 10 mb
       num_segs = 2;
       pipes = 2;
     } else { // greater than 5 mb (S3 does not allow multipart uploads < 5 mb)
